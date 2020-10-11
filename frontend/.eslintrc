@@ -1,0 +1,15 @@
+{
+    "env": {
+        "es6": true
+    },
+    "plugins": ["import"],
+    "extends": ["plugin:prettier/recommended"],
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "rules": {
+        "no-console": "error",
+        "quotes": [2, "single"]
+    }
+}

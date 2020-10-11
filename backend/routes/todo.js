@@ -39,6 +39,8 @@ todo.put('/:id', secureRoute, async (req, res) => {
       data: findTodo,
       message: ''
     })
+  } catch(e) {
+    console.log('error >> ', e)
   }
 })
 
