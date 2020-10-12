@@ -1,15 +1,37 @@
 const todo = require('express').Router()
 const { secureRoute } = require('../middleware')
-const jwt = require('jsonwebtoken')
 const Todos = require('../models/Todos')
 
 todo.get('/', secureRoute, async (req, res) => {
-  const todos = await Todos.find()
+  try {
+    const todos = await Todos.find()
 
-  if (todos) {
     res.json({
       data: todos,
       message: ''
+    })
+  } catch(err) {
+    res.status(404)
+    res.json({
+      error: err,
+      message: 'Cannot get todo',
+    })
+  }
+})
+
+todo.get('/:id', secureRoute, async (req, res) => {
+  try {
+    const todo = await Todos.findOne({ _id: req.params.id })
+
+    res.status(200).json({
+      data: todo,
+      message: ''
+    })
+  } catch(err){
+    res.status(404)
+    res.json({
+      error: err,
+      message: 'Task not found'
     })
   }
 })
@@ -18,6 +40,7 @@ todo.post('/', secureRoute, async (req, res) => {
   try {
     const newTodos = new Todos(req.body)
     newTodos.userId = req.user._id
+    newTodos.done = false
 
     await newTodos.save()
 
@@ -26,24 +49,62 @@ todo.post('/', secureRoute, async (req, res) => {
       message: ''
     })
 
-  } catch(e) {
-    res.sendStatus(500)
+  } catch(err) {
+    res.status(403)
+    res.json({
+      error: err,
+      message: 'Cannot add task'
+    })
   }
 })
 
-todo.put('/:id', secureRoute, async (req, res) => {
-  try {
-    const findTodo = Todos.findOne({ _id: req.params._id })
+todo.put('/:id', secureRoute, (req, res) => {
+  const findTask = Todos.findByIdAndUpdate(req.params.id, {$set: req.body}, (err, task) => {
+    if (err) return res.status(404).json({message: 'error not found'})
 
-    res.json({
+    res.send('Product updated')
+  })
+})
+
+// todo.patch('/:id', secureRoute, async (req, res) => {
+//   try {
+//     const todo = await Todos.findOne({ _id : req.params.id})
+
+//     if (req.body.title) {
+//       todo.title = req.body.title
+//     }
+
+//     await Todos.save()
+
+//     res.json({
+//       data: todo,
+//       message: ''
+//     })
+
+//     // if (req.body.done) {
+//     //   todo.done = req.body.done
+//     // }
+
+//     // await Todos.save()
+//     // res.send(post)
+//   } catch(e){
+//     res.send({ error: 'Task bang doesnt exist' })
+//   }
+// })
+
+todo.delete('/:id', secureRoute, async (req, res) => {
+  try {
+    const findTodo = await Todos.findOne({ _id: req.params.id})
+
+    await Todos.deleteOne({_id: req.params.id})
+
+    res.status(204).json({
       data: findTodo,
-      message: ''
+      message: 'Data berhasil di hapus'
     })
   } catch(e) {
-    console.log('error >> ', e)
+    res.status(404).send({ error: 'Task doesnt exist'})
   }
 })
-
-todo.delete('/:id', secureRoute, async (req, res) => {})
 
 module.exports = todo

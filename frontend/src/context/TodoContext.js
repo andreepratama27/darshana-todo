@@ -2,22 +2,65 @@ import React from 'react'
 const { createContext, useReducer } = require("react");
 
 const initialState = {
-  default: [
-    { task: 'Andre Pratama', done: false},
-    { task: 'Ayo daftar UIN', done: true},
-    { task: 'Ayo denger Peterese', done: false},
-  ],
-  finished: []
+  task: []
 }
 
-export const TodoContext = createContext(initialState)
+const TodoContext = createContext(initialState)
 
 const todoReducer = (state, action) => {
   switch (action.type) {
+    case 'INIT_TODO': {
+      return {
+        ...state,
+        task: [...state.task, ...action.payload]
+      }
+    }
+
     case 'ADD_TODO': {
       return {
         ...state,
-        default: [...state.default, action.payload]
+        task: [...state.task, action.payload]
+      }
+    }
+
+    case 'UPDATE_TODO': {
+      const filterTask = state.task.findIndex(v => v._id === action.payload._id) 
+      const newTask = [...state.task]
+
+
+      newTask[filterTask] = {
+        ...newTask[filterTask],
+        done: action.payload.done
+      }
+
+      return {
+        ...state,
+        task: newTask
+      }
+    }
+
+    case 'UPDATE_TITLE': {
+      const filterTask = state.task.findIndex(v => v._id === action.payload._id) 
+      const newTask = [...state.task]
+
+
+      newTask[filterTask] = {
+        ...newTask[filterTask],
+        title: action.payload.title
+      }
+
+      return {
+        ...state,
+        task: newTask
+      }
+    }
+
+    case 'DELETE_TODO': {
+      const filteredTask = state.task.filter(item => item._id !== action.payload)
+
+      return {
+        ...state,
+        task: filteredTask
       }
     }
 
@@ -38,5 +81,6 @@ const TodoProvider = ({ children }) => {
 }
 
 export {
+  TodoContext,
   TodoProvider
 }

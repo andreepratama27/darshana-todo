@@ -9,7 +9,7 @@
         "sourceType": "module"
     },
     "rules": {
-        "no-console": "error",
+        "no-console": "warning",
         "quotes": [2, "single"]
     }
 }

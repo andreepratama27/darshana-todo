@@ -1,18 +1,20 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect, createRef } from 'react'
 import { Transition } from 'react-transition-group'
-import { IoIosCloseCircleOutline } from 'react-icons/io'
+import { IoIosCloseCircleOutline, IoIosTrash, IoIosSave } from 'react-icons/io'
 import { TodoContext } from '../../../context/TodoContext'
+import { Input } from '../../atoms' 
+import { useTodo } from '../../../hooks/todo.hooks'
 
 function Modal({ value, visible, onClose }) {
   const duration = 300
+  const inputRef = createRef(null)
+
   const [selected, setSelected] = useState()
-  const [, dispatch] = useContext(TodoContext)
+  const [, { onAddTask, onDeleteTask, onChangeTitle }] = useTodo()
 
   useEffect(() => { 
     setSelected(value)
   }, [value])
-
-  console.log('value >> ', value)
 
   const defaultStyle = {
     transition: `opacity ${duration}ms ease-in-out`,
@@ -20,55 +22,85 @@ function Modal({ value, visible, onClose }) {
   }
 
   const transitionStyles = {
-    entering: {opacity: 1},
-    entered: {opacity: 1},
-    exiting: {opacity: 0},
-    exited: {opacity: 0},
+    entering: {opacity: 1, zIndex: 30},
+    entered: {opacity: 1, zIndex: 30},
+    exiting: {opacity: 0, zIndex: 0},
+    exited: {opacity: 0, zIndex: 0},
   }
 
   const handleChangeTask = ({ target, keyCode }) => {
     if (keyCode === 13) {
-      dispatch({ type: 'ADD_TODO', payload: {
-        task: target.value,
+      if (selected._id) {
+        onChangeTitle(selected, target.value)
+        onClose()
+        return
+      }
+
+      onAddTask({
+        title: target.value,
         done: false
-      }})
+      })
 
       onClose()
     }
   }
 
-  // React.useEffect(() => {
-  //   if (visible) {
-  //     setShow(visible)
-  //   }
-  // }, [visible])
+  const onSave = () => {
+    if (selected._id) {
+      onChangeTitle(selected, inputRef.current?.value)
+      onClose()
+      return
+    }
 
-  // if (show) {
+    onAddTask({
+      title: inputRef.current?.value,
+      done: false
+    })
 
-  console.log(selected)
-    return (
-      <Transition in={visible} timeout={duration}>
-        {state => (
-          <div className='w-full p-4 bg-white absolute bottom-0 shadow-md border-t rounded-t-lg'
-            style={{
-              ...defaultStyle,
-              ...transitionStyles[state]
-            }}
-          >
-            <p className='mb-2'>Add new task</p>
+    onClose()
+  }
 
-            <div className='flex flex-row justify-center items-center'>
-              <input value={selected?.task} placeholder="Type your task here" className='w-full bg-gray-100 py-2 px-4 border rounded mt-2' onKeyDown={handleChangeTask} autoFocus />
+  const onDelete = () => {
+    onDeleteTask(value)
+    onClose()
+  }
 
-              <button onClick={onClose} className='flex flex-row justify-end items-center w-10 mt-2 py-2 outline-none focus:outline-none'>
-                <IoIosCloseCircleOutline size={24} className='text-red-500' />
-              </button>
-            </div>
+  const handleClose = () => {
+    onClose()
+    setSelected(null)
+  }
+
+  return (
+    <Transition in={visible} timeout={duration}>
+      {state => (
+        <div className='p-4 bg-white absolute bottom-0 shadow-md border-t rounded-t-lg w-1/2 right-0 left-0 mx-auto'
+          style={{
+            ...defaultStyle,
+            ...transitionStyles[state]
+          }}
+        >
+          <button onClick={handleClose} className='absolute top-0 flex justify-center items-center right-0 w-8 h-8 bg-red-500 rounded-full' style={{ top: -20 }}>
+            <IoIosCloseCircleOutline className='text-white' size={20} />
+          </button>
+          <p className='mb-2'>Add new task</p>
+
+          <div className='flex flex-row justify-center items-center'>
+            <Input ref={inputRef} placeholder="Type your task here" className='w-full bg-gray-100 py-2 px-4 border rounded mt-2' onKeyUp={handleChangeTask} autoFocus />
           </div>
-        )}
-      </Transition>
-    )
-  // }
+
+          <div className='w-full my-2 mt-4 flex flex-row justify-end'>
+            <button className='w-8 h-8 flex items-center justify-center bg-red-700 rounded-md mr-3' onClick={onDelete}>
+              <IoIosTrash className='text-white' />
+            </button>
+
+            <button className='w-8 h-8 flex items-center justify-center bg-blue-700 rounded-md' onClick={onSave}>
+              <IoIosSave className='text-white' />
+            </button>
+          </div>
+        </div>
+      )}
+    </Transition>
+  )
 }
 
 export default Modal

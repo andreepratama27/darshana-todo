@@ -31,7 +31,10 @@ auth.post('/login', (req, res) => {
   Users.findOne({ email: req.body.email }, (err, user) => {
     const comparePass = bcrypt.compareSync(req.body.password, user.password)
 
-    if (err) res.status(400).send(err)
+    if (err) res.status(400).json({
+      error: err,
+      message: 'User not found'
+    })
 
     if (!user || !comparePass) {
       return res.json({
