@@ -1,8 +1,8 @@
 import React from 'react'
-const { createContext, useReducer } = require("react");
+const { createContext, useReducer } = require('react')
 
 const initialState = {
-  task: []
+  task: [],
 }
 
 const TodoContext = createContext(initialState)
@@ -12,55 +12,59 @@ const todoReducer = (state, action) => {
     case 'INIT_TODO': {
       return {
         ...state,
-        task: [...state.task, ...action.payload]
+        task: action.payload,
       }
     }
 
     case 'ADD_TODO': {
       return {
         ...state,
-        task: [...state.task, action.payload]
+        task: [...state.task, action.payload],
       }
     }
 
     case 'UPDATE_TODO': {
-      const filterTask = state.task.findIndex(v => v._id === action.payload._id) 
+      const filterTask = state.task.findIndex(
+        (v) => v._id === action.payload._id
+      )
       const newTask = [...state.task]
-
 
       newTask[filterTask] = {
         ...newTask[filterTask],
-        done: action.payload.done
+        done: action.payload.done,
       }
 
       return {
         ...state,
-        task: newTask
+        task: newTask,
       }
     }
 
     case 'UPDATE_TITLE': {
-      const filterTask = state.task.findIndex(v => v._id === action.payload._id) 
+      const filterTask = state.task.findIndex(
+        (v) => v._id === action.payload._id
+      )
       const newTask = [...state.task]
-
 
       newTask[filterTask] = {
         ...newTask[filterTask],
-        title: action.payload.title
+        title: action.payload.title,
       }
 
       return {
         ...state,
-        task: newTask
+        task: newTask,
       }
     }
 
     case 'DELETE_TODO': {
-      const filteredTask = state.task.filter(item => item._id !== action.payload)
+      const filteredTask = state.task.filter(
+        (item) => item._id !== action.payload
+      )
 
       return {
         ...state,
-        task: filteredTask
+        task: filteredTask,
       }
     }
 
@@ -73,14 +77,11 @@ const todoReducer = (state, action) => {
 const TodoProvider = ({ children }) => {
   const [state, dispatch] = useReducer(todoReducer, initialState)
 
-  return(
+  return (
     <TodoContext.Provider value={[state, dispatch]}>
       {children}
     </TodoContext.Provider>
   )
 }
 
-export {
-  TodoContext,
-  TodoProvider
-}
+export { TodoContext, TodoProvider }
